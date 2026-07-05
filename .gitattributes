@@ -2,7 +2,6 @@
 # this repo was created on Linux; without this, Windows checkouts (autocrlf=true)
 # turn every source file into a noisy all-lines-changed diff on the first edit.
 * text=auto eol=lf
-
 *.ts    text eol=lf
 *.tsx   text eol=lf
 *.js    text eol=lf
@@ -15,7 +14,6 @@
 *.yml   text eol=lf
 *.yaml  text eol=lf
 *.svg   text eol=lf
-
 *.png   binary
 *.jpg   binary
 *.jpeg  binary
@@ -23,6 +21,5 @@
 *.ico   binary
 *.woff  binary
 *.woff2 binary
-
 # Never diff the lockfile line-by-line — it's machine-generated noise.
 package-lock.json -diff
