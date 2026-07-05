@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// A user builds and owns exactly one plan (their "constitution"). Nothing here is
+// developer-authored or hardcoded per-portfolio the way atlas-core's two portfolios
+// are — every number below came from the user's own onboarding wizard input.
+model User {
+  id                  String        @id @default(cuid())
+  email               String        @unique
+  name                String
+  passwordHash        String
+  // Investment horizon — a timeframe, never a "purpose" category (no retirement/
+  // house/general taxonomy). At least one of these two is set by the wizard.
+  horizonYears        Int?
+  targetDate          DateTime?
+  monthlyContribution Float         @default(0)
+  // How this user keeps their holdings' value current — chosen once in the wizard,
+  // changeable later in settings. "manual" = user types in values themselves;
+  // "units_market" = user enters units held, app fetches a live quote per ticker;
+  // "broker" = read-only broker sync (Phase 3 — IBKR first).
+  valueTrackingMode   String        @default("manual")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  constitution        Constitution?
+  holdings            Holding[]
+  brokerConnection    BrokerConnection?
+}
+
+// The plan itself — identity/metadata only. The actual funds/targets/guardrails
+// live in ConstitutionFund so the engine can iterate them generically.
+model Constitution {
+  id        String            @id @default(cuid())
+  userId    String            @unique
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String            @default("My Plan")
+  currency  String            @default("USD")
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  funds     ConstitutionFund[]
+  // A single optional combined-ceiling group (e.g. "these two funds together must
+  // stay under X%") — kept singular for v1, matching the simplification the two
+  // existing hardcoded portfolios both settled on. JSON: { tickers: string[], warning: number, hard: number } | null
+  combinedGroup String?
+  drawdownTriggerPct Float?
+}
+
+// One row per fund the user chose. Every number here was typed by the user in the
+// wizard — nothing is a suggested default they merely accepted.
+model ConstitutionFund {
+  id             String       @id @default(cuid())
+  constitutionId String
+  constitution   Constitution @relation(fields: [constitutionId], references: [id], onDelete: Cascade)
+  ticker         String
+  name           String
+  color          String       @default("#6366f1")
+  targetPct      Float
+  rangeLow       Float
+  rangeHigh      Float
+  hardCap        Float?
+  floor          Float?
+  createdAt      DateTime     @default(now())
+
+  @@unique([constitutionId, ticker])
+}
+
+// Current position tracking — deliberately the same shape atlas-core already uses
+// successfully for time-series value tracking, so nothing here needs reinventing.
+model Holding {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticker    String
+  name      String
+  color     String     @default("#6366f1")
+  units     Float      @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  snapshots Snapshot[]
+
+  @@unique([userId, ticker])
+}
+
+model Snapshot {
+  id        String   @id @default(cuid())
+  holdingId String
+  holding   Holding  @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  date      DateTime @default(now())
+  units     Float
+  price     Float
+  value     Float
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+}
+
+// Phase 3 (not yet wired up) — read-only broker credentials, IBKR Flex Query first.
+// flexToken will be encrypted at rest once Phase 3 actually starts writing to this
+// field; the model is added now so the schema doesn't need a second migration.
+model BrokerConnection {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  broker              String    @default("ibkr")
+  flexToken           String
+  flexQueryId         String
+  flexQueryIdActivity String?
+  lastSyncedAt        DateTime?
+  createdAt           DateTime  @default(now())
+}

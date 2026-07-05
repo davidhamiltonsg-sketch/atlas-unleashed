@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Atlas Unleashed
 
-## Getting Started
+Build your own investment plan — funds, target weights, tolerance bands, caps —
+and let this app hold you to it. It never recommends what to buy, what weights
+to pick, or what thresholds to use, and it never places a trade. Its only job
+is to check your portfolio against the rules you set for yourself.
 
-First, run the development server:
+## What's here (v1)
+
+- Self-serve onboarding wizard: account → investment horizon (a timeframe, not
+  a "purpose") → funds → starting point → guardrails → review
+- One generic compliance engine (`lib/engine.ts`) driving every user's plan —
+  a fixed priority ladder (hard cap → combined ceiling → floor → drawdown →
+  underweight drift → standard split), parameterized entirely by what the user
+  typed in
+- Three ways to keep a fund's value current: manual entry, units held + a live
+  market-price lookup (Finnhub), or a read-only broker connection (not yet
+  built — see below)
+- A dashboard: this month's compliance-framed recommendation, a health
+  scorecard, and an editable holdings table
+- A read-only "Your plan" summary page — a templated view of what you built,
+  not hand-authored prose
+
+## Not yet built (fast-follows)
+
+- **Read-only IBKR broker sync.** The `BrokerConnection` schema model exists,
+  but the sync logic/UI don't yet — see the plan below for exactly what's
+  scoped. No broker order/trade-placement code exists anywhere in this repo.
+- Look-through/hidden-exposure analysis for arbitrary tickers
+- Phase/milestone goal mechanics
+- Brokers beyond IBKR
+
+## Local setup
 
 ```bash
+npm install
+cp .env.example .env   # then fill in DATABASE_URL, SESSION_SECRET, (optional) FINNHUB_API_KEY
+npx prisma generate
+npx prisma db push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/signup](http://localhost:3000/signup) to build a plan.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Verification
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run check   # generic-engine contract test (scripts/check-engine.ts)
+npm run lint
+npm run build
+```
 
-## Learn More
+## Stack
 
-To learn more about Next.js, take a look at the following resources:
+Next.js 16 (App Router) · React 19 · Prisma 7 + SQLite (`@libsql/client`) ·
+Tailwind 4 · `bcryptjs` · `jose` (JWT sessions) · `lucide-react`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Mirrors the proven stack of a sibling project (`atlas-core`), adapted here for
+a single, user-authored portfolio rather than a fixed hardcoded one.
