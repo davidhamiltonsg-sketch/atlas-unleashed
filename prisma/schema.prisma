@@ -97,6 +97,23 @@ model Snapshot {
   createdAt DateTime @default(now())
 }
 
+// AI-estimated fund composition — since a user can type ANY ticker, there is no
+// hand-maintained fact-sheet table the way atlas-core has for its fixed universe.
+// Claude is asked what it knows about the ticker's sector and top holdings;
+// results are cached here (never re-queried every page load) and always
+// surfaced in the UI as an estimate to verify against the fund's own fact sheet,
+// never as verified data.
+model FundLookThrough {
+  id           String   @id @default(cuid())
+  ticker       String   @unique
+  sector       String
+  topHoldings  String   // JSON: Array<{ name: string; pct: number }>
+  confidence   String   // "high" | "medium" | "low"
+  note         String
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+}
+
 // Phase 3 (not yet wired up) — read-only broker credentials, IBKR Flex Query first.
 // flexToken will be encrypted at rest once Phase 3 actually starts writing to this
 // field; the model is added now so the schema doesn't need a second migration.

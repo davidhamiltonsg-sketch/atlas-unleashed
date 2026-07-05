@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation"
-import Link from "next/link"
 import { getSession } from "@/lib/session"
 import { db } from "@/lib/db"
-import { ArrowLeft } from "lucide-react"
+import { AppHeader } from "@/components/shell/app-header"
 
 function fmtHorizon(horizonYears: number | null, targetDate: Date | null) {
   if (horizonYears) return `${horizonYears} years`
@@ -30,13 +29,7 @@ export default async function ConstitutionPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-3xl mx-auto px-5 py-4">
-          <Link href="/" className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to dashboard
-          </Link>
-        </div>
-      </header>
+      <AppHeader userName={user.name} />
 
       <main className="max-w-3xl mx-auto px-5 py-8 space-y-6">
         <div>

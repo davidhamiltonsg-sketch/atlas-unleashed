@@ -98,6 +98,22 @@ function broadestFund(positions: FundPosition[], exclude: string[] = []): FundPo
     .sort((a, b) => b.targetPct - a.targetPct)[0]
 }
 
+// ─── Shared breach predicates ────────────────────────────────────────────────
+// Exported so lib/rules.ts's rule-by-rule checklist tests the EXACT same
+// thresholds route() uses — never a second, slightly different copy.
+export function isOverHardCap(p: FundPosition): boolean {
+  return p.hardCap !== null && p.actualPct > p.hardCap
+}
+export function isUnderFloor(p: FundPosition): boolean {
+  return p.floor !== null && p.actualPct < p.floor
+}
+export function isOutOfRange(p: FundPosition): boolean {
+  return p.actualPct < p.rangeLow || p.actualPct > p.rangeHigh
+}
+export function combinedGroupTotal(positions: FundPosition[], group: CombinedGroup): number {
+  return positions.filter((p) => group.tickers.includes(p.ticker)).reduce((s, p) => s + p.actualPct, 0)
+}
+
 export function route(positions: FundPosition[], totalValue: number, opts: EngineOptions = {}): EngineBranch {
   if (totalValue <= 0 || positions.length === 0) return { tag: "empty" }
 
