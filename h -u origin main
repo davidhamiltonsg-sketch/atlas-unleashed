@@ -1,0 +1,36 @@
+[1mdiff --cc .gitattributes[m
+[1mindex 0bf7cf2,bf9dba3..0000000[m
+[1m--- a/.gitattributes[m
+[1m+++ b/.gitattributes[m
+[36m@@@ -2,7 -2,6 +2,10 @@@[m
+  # this repo was created on Linux; without this, Windows checkouts (autocrlf=true)[m
+  # turn every source file into a noisy all-lines-changed diff on the first edit.[m
+  * text=auto eol=lf[m
+[32m++<<<<<<< HEAD[m
+[32m +[m
+[32m++=======[m
+[32m++>>>>>>> 8e624d2cee81771f2983b8aee0e4af5deb367e3e[m
+  *.ts    text eol=lf[m
+  *.tsx   text eol=lf[m
+  *.js    text eol=lf[m
+[36m@@@ -15,7 -14,6 +18,10 @@@[m
+  *.yml   text eol=lf[m
+  *.yaml  text eol=lf[m
+  *.svg   text eol=lf[m
+[32m++<<<<<<< HEAD[m
+[32m +[m
+[32m++=======[m
+[32m++>>>>>>> 8e624d2cee81771f2983b8aee0e4af5deb367e3e[m
+  *.png   binary[m
+  *.jpg   binary[m
+  *.jpeg  binary[m
+[36m@@@ -23,6 -21,5 +29,9 @@@[m
+  *.ico   binary[m
+  *.woff  binary[m
+  *.woff2 binary[m
+[32m++<<<<<<< HEAD[m
+[32m +[m
+[32m++=======[m
+[32m++>>>>>>> 8e624d2cee81771f2983b8aee0e4af5deb367e3e[m
+  # Never diff the lockfile line-by-line — it's machine-generated noise.[m
+  package-lock.json -diff[m
